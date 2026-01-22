@@ -6,6 +6,7 @@
 
 i {
     color: #9eb3aa;
+    font-size: 14px;
     margin-right: 8px;
     margin-left: 8px;
 }
@@ -46,8 +47,8 @@ body,
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     align-items: center;
-    height: 40px;
-    padding: 6px 1vw;
+    height: 34px;
+    padding: 4px 1vw;
     margin: 0 12px;
 }
 
@@ -70,7 +71,6 @@ body,
 .right {
     justify-self: end;
     align-items: right;
-    padding-top: 2px;
 }
 
 .logo,
@@ -97,14 +97,18 @@ body,
     padding: 2px 6px;
     color: #9eb3aa;
     border: none;
-    border-radius: 50px;
+    border-radius: 4px;
     cursor: pointer;
 
     &.displayed,
     &.focused,
     &:hover {
         background: #9eb3aa;
-        color: #2a312b; 
+        height: 14px;
+        margin-top: 3px;
+        overflow: hidden;
+        padding: 0;
+        width: 14px;
     }
 }
 
@@ -150,7 +154,7 @@ body,
     position: absolute;
     font-size: 12px;
     left: -8px;
-    top: 3px;
+    top: 2px;
 }
 
 .nf-fa-battery_0 {
