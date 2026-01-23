@@ -90,25 +90,23 @@ body,
 }
 
 .workspace {
-    font-size: 14px;
-    font-weight: 500;
     background: transparent;
-    margin-right: 6px;
-    padding: 2px 6px;
-    color: #9eb3aa;
     border: none;
     border-radius: 4px;
+    color: #9eb3aa;
     cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    height: 15px;
+    margin-right: 6px;
+    padding: 0;
+    width: 15px;
 
     &.displayed,
     &.focused,
     &:hover {
         background: #9eb3aa;
-        height: 14px;
-        margin-top: 3px;
         overflow: hidden;
-        padding: 0;
-        width: 14px;
     }
 }
 

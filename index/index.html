@@ -4,88 +4,39 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+    <!-- Custom styles. -->
     <link rel="stylesheet" type="text/css" href="./styles.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-
+    <!-- Allows React to be run buildless via "text/babel" script below. -->
     <script
       src="https://unpkg.com/@babel/standalone@7.25.6/babel.min.js"
+      integrity="sha256-aS0B0wnsaDByLfE16h4MDCP1fQFccysd1YWOcV+gbBo="
       crossorigin="anonymous"
     ></script>
   </head>
-
   <body>
     <div id="root"></div>
 
     <script type="text/babel" data-type="module">
-      import React, { useState, useEffect } from "https://esm.sh/react@18?dev";
-      import { createRoot } from "https://esm.sh/react-dom@18/client?dev";
-      import * as zebar from "https://esm.sh/zebar@2";
+      import React, {
+        useState,
+        useEffect,
+      } from 'https://esm.sh/react@18?dev';
+      import { createRoot } from 'https://esm.sh/react-dom@18/client?dev';
+      import * as zebar from 'https://esm.sh/zebar@2';
 
-      /* -------------------------------
-         PROVIDERS
-      --------------------------------*/
       const providers = zebar.createProviderGroup({
-        network: { type: "network" },
-        glazewm: { type: "glazewm" },
-        cpu: { type: "cpu" },
-        date: { type: "date", formatting: "cccc dd.MM.yyyy | t" }, // unused now
-        battery: { type: "battery" },
-        memory: { type: "memory" },
-        weather: { type: "weather" },
+        network: { type: 'network' },
+        glazewm: { type: 'glazewm' },
+        cpu: { type: 'cpu' },
+        date: { type: 'date', formatting: 'cccc t         ' },
+        battery: { type: 'battery' },
+        memory: { type: 'memory' },
+        weather: { type: 'weather' },
       });
 
-      /* -------------------------------
-         TIME / DATE TOGGLE WIDGET
-      --------------------------------*/
-      function TimeWidget() {
-        const [now, setNow] = useState(new Date());
-        const [showDate, setShowDate] = useState(false);
+      createRoot(document.getElementById('root')).render(<App />);
 
-        useEffect(() => {
-          const interval = setInterval(() => setNow(new Date()), 1000);
-          return () => clearInterval(interval);
-        }, []);
-
-        const toggle = () => setShowDate((prev) => !prev);
-
-        // Register Alt+Shift+C
-        useEffect(() => {
-          const handler = (e) => {
-            if (e.altKey && e.shiftKey && e.code === "KeyC") {
-              toggle();
-            }
-          };
-          window.addEventListener("keydown", handler);
-          return () => window.removeEventListener("keydown", handler);
-        }, []);
-
-        const formatTime = (d) =>
-          d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
-
-        const formatDay = (d) =>
-          d.toLocaleDateString([], { weekday: "long" });
-
-        const formatDate = (d) =>
-          d.toLocaleDateString([], {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          });
-
-        return (
-          <div
-            className="time-widget"
-            onClick={toggle}
-            style={{ cursor: "pointer", padding: "0 10px" }}
-          >
-            {showDate ? formatDate(now) : `${formatDay(now)} ${formatTime(now)}`}
-          </div>
-        );
-      }
-
-      /* -------------------------------
-         MAIN APP
-      --------------------------------*/
       function App() {
         const [output, setOutput] = useState(providers.outputMap);
 
@@ -93,46 +44,74 @@
           providers.onOutput(() => setOutput(providers.outputMap));
         }, []);
 
+        // Get icon to show for current network status.
         function getNetworkIcon(networkOutput) {
           switch (networkOutput.defaultInterface?.type) {
-            case "ethernet":
+            case 'ethernet':
               return <i className="nf nf-md-ethernet_cable"></i>;
-            case "wifi":
-              const s = networkOutput.defaultGateway?.signalStrength;
-              if (s >= 80) return <i className="nf nf-md-wifi_strength_4"></i>;
-              if (s >= 65) return <i className="nf nf-md-wifi_strength_3"></i>;
-              if (s >= 40) return <i className="nf nf-md-wifi_strength_2"></i>;
-              if (s >= 25) return <i className="nf nf-md-wifi_strength_1"></i>;
-              return <i className="nf nf-md-wifi_strength_outline"></i>;
+            case 'wifi':
+              if (networkOutput.defaultGateway?.signalStrength >= 80) {
+                return <i className="nf nf-md-wifi_strength_4"></i>;
+              } else if (
+                networkOutput.defaultGateway?.signalStrength >= 65
+              ) {
+                return <i className="nf nf-md-wifi_strength_3"></i>;
+              } else if (
+                networkOutput.defaultGateway?.signalStrength >= 40
+              ) {
+                return <i className="nf nf-md-wifi_strength_2"></i>;
+              } else if (
+                networkOutput.defaultGateway?.signalStrength >= 25
+              ) {
+                return <i className="nf nf-md-wifi_strength_1"></i>;
+              } else {
+                return <i className="nf nf-md-wifi_strength_outline"></i>;
+              }
             default:
-              return <i className="nf nf-md-wifi_strength_off_outline"></i>;
+              return (
+                <i className="nf nf-md-wifi_strength_off_outline"></i>
+              );
           }
         }
 
-        function getBatteryIcon(b) {
-          if (b.chargePercent > 90) return <i className="nf nf-fa-battery_4"></i>;
-          if (b.chargePercent > 70) return <i className="nf nf-fa-battery_3"></i>;
-          if (b.chargePercent > 40) return <i className="nf nf-fa-battery_2"></i>;
-          if (b.chargePercent > 20) return <i className="nf nf-fa-battery_1"></i>;
+        // Get icon to show for how much of the battery is charged.
+        function getBatteryIcon(batteryOutput) {
+          if (batteryOutput.chargePercent > 90)
+            return <i className="nf nf-fa-battery_4"></i>;
+          if (batteryOutput.chargePercent > 70)
+            return <i className="nf nf-fa-battery_3"></i>;
+          if (batteryOutput.chargePercent > 40)
+            return <i className="nf nf-fa-battery_2"></i>;
+          if (batteryOutput.chargePercent > 20)
+            return <i className="nf nf-fa-battery_1"></i>;
           return <i className="nf nf-fa-battery_0"></i>;
         }
 
-        function getWeatherIcon(w) {
-          switch (w.status) {
-            case "clear_day": return <i className="fas fa-sun"></i>;
-            case "clear_night": return <i className="fas fa-moon"></i>;
-            case "cloudy_day":
-            case "cloudy_night": return <i className="fas fa-cloud"></i>;
-            case "light_rain_day":
-            case "light_rain_night": return <i className="fas fa-cloud-rain"></i>;
-            case "heavy_rain_day":
-            case "heavy_rain_night": return <i className="fas fa-cloud-showers-heavy"></i>;
-            case "snow_day":
-            case "snow_night": return <i className="fas fa-snowflake"></i>;
-            case "thunder_day":
-            case "thunder_night": return <i className="fas fa-bolt"></i>;
-            default: return <i className="fas fa-question"></i>;
-          }
+       // Get icon to show for current weather status.
+        function getWeatherIcon(weatherOutput) {
+           switch (weatherOutput.status) {
+  case 'clear_day':
+    return <i className="fas fa-sun"></i>;
+  case 'clear_night':
+    return <i className="fas fa-moon"></i>;
+  case 'cloudy_day':
+  case 'cloudy_night':
+    return <i className="fas fa-cloud"></i>;
+  case 'light_rain_day':
+  case 'light_rain_night':
+    return <i className="fas fa-cloud-rain"></i>;
+  case 'heavy_rain_day':
+  case 'heavy_rain_night':
+    return <i className="fas fa-cloud-showers-heavy"></i>;
+  case 'snow_day':
+  case 'snow_night':
+    return <i className="fas fa-snowflake"></i>;
+  case 'thunder_day':
+  case 'thunder_night':
+    return <i className="fas fa-bolt"></i>;
+  default:
+    return <i className="fas fa-question"></i>; // fallback
+}
         }
 
         return (
@@ -140,27 +119,24 @@
             <div className="left">
               {output.glazewm && (
                 <div className="workspaces">
-                  {output.glazewm.currentWorkspaces.map((ws) => (
+                  {output.glazewm.currentWorkspaces.map(workspace => (
                     <button
-                      key={ws.name}
-                      className={`workspace ${ws.hasFocus && "focused"} ${
-                        ws.isDisplayed && "displayed"
-                      }`}
+                      className={`workspace ${workspace.hasFocus && 'focused'} ${workspace.isDisplayed && 'displayed'}`}
                       onClick={() =>
-                        output.glazewm.runCommand(`focus --workspace ${ws.name}`)
+                        output.glazewm.runCommand(
+                          `focus --workspace ${workspace.name}`,
+                        )
                       }
+                      key={workspace.name}
                     >
-                      {ws.displayName ?? ws.name}
+                      {workspace.displayName ?? workspace.name}
                     </button>
                   ))}
                 </div>
               )}
             </div>
 
-            {/* NEW TIME WIDGET REPLACES OLD DATE */}
-            <div className="center">
-              <TimeWidget />
-            </div>
+            <div className="center">{output.date?.formatted}  </div>
 
             <div className="right">
               {output.glazewm && (
@@ -169,42 +145,39 @@
                     <button
                       className="paused-button"
                       onClick={() =>
-                        output.glazewm.runCommand("wm-toggle-pause")
+                        output.glazewm.runCommand('wm-toggle-pause')
                       }
                     >
                       PAUSED
                     </button>
                   )}
-
-                  {output.glazewm.bindingModes.map((mode) => (
+                  {output.glazewm.bindingModes.map(bindingMode => (
                     <button
-                      key={mode.name}
                       className="binding-mode"
+                      key={bindingMode.name}
                       onClick={() =>
                         output.glazewm.runCommand(
-                          `wm-disable-binding-mode --name ${mode.name}`
+                          `wm-disable-binding-mode --name ${bindingMode.name}`,
                         )
                       }
                     >
-                      {mode.displayName ?? mode.name}
+                      {bindingMode.displayName ?? bindingMode.name}
                     </button>
                   ))}
 
                   <button
-                    className={`tiling-direction nf ${
-                      output.glazewm.tilingDirection === "horizontal"
-                        ? "nf-md-swap_horizontal"
-                        : "nf-md-swap_vertical"
-                    }`}
+                    className={`tiling-direction nf ${output.glazewm.tilingDirection === 'horizontal' ? 'nf-md-swap_horizontal' : 'nf-md-swap_vertical'}`}
                     onClick={() =>
-                      output.glazewm.runCommand("toggle-tiling-direction")
+                      output.glazewm.runCommand('toggle-tiling-direction')
                     }
                   ></button>
                 </>
               )}
 
               {output.network && (
-                <div className="network">{getNetworkIcon(output.network)}</div>
+                <div className="network">
+                  {getNetworkIcon(output.network)}
+                </div>
               )}
 
               {output.memory && (
@@ -217,7 +190,11 @@
               {output.cpu && (
                 <div className="cpu">
                   <i className="nf nf-oct-cpu"></i>
-                  <span className={output.cpu.usage > 85 ? "high-usage" : ""}>
+
+                  {/* Change the text color if the CPU usage is high. */}
+                  <span
+                    className={output.cpu.usage > 85 ? 'high-usage' : ''}
+                  >
                     {Math.round(output.cpu.usage)}%
                   </span>
                 </div>
@@ -225,6 +202,7 @@
 
               {output.battery && (
                 <div className="battery">
+                  {/* Show icon for whether battery is charging. */}
                   {output.battery.isCharging && (
                     <i className="nf nf-md-power_plug charging-icon"></i>
                   )}
@@ -243,8 +221,6 @@
           </div>
         );
       }
-
-      createRoot(document.getElementById("root")).render(<App />);
     </script>
   </body>
 </html>
