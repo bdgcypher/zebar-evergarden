@@ -1,7 +1,7 @@
 {
   "$schema": "https://github.com/glzr-io/zebar/raw/v3.0.3/resources/zpack-schema.json",
   "name": "evergarden",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A minimal and beautiful top bar following the Evergarden Winter theme from https://everviolet.xyz/palette",
   "tags": [
     "transparent",
